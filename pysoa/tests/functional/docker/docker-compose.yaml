@@ -1,0 +1,427 @@
+version: "2.4"
+networks:
+  pysoa:
+    driver: bridge
+
+services:
+  mysql:
+    image: "pysoa-test-mysql"
+    networks:
+      pysoa:
+        aliases:
+          - mysql.pysoa
+
+  # Two standalone Redis servers
+  redis5-standalone:
+    image: "redis:5.0-buster"
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "INFO", "server"]
+      start_period: 5s
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      pysoa:
+        aliases:
+          - standalone.redis5.pysoa
+    volumes:
+      - type: bind
+        source: ../run/redis/redis5-standalone.conf
+        target: /usr/local/etc/redis/redis.conf
+    sysctls:
+      net.core.somaxconn: 1024
+  redis6-standalone:
+    image: "redis:6.0-rc2-buster"
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "INFO", "server"]
+      start_period: 5s
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      pysoa:
+        aliases:
+          - standalone.redis6.pysoa
+    volumes:
+      - type: bind
+        source: ../run/redis/redis6-standalone.conf
+        target: /usr/local/etc/redis/redis.conf
+    sysctls:
+      net.core.somaxconn: 1024
+
+  # Two Redis clusters
+  redis5-master:
+    image: "redis:5.0-buster"
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "INFO", "server"]
+      start_period: 5s
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      pysoa:
+        aliases:
+          - master.redis5.pysoa
+    volumes:
+      - type: bind
+        source: ../run/redis/redis5-master.conf
+        target: /usr/local/etc/redis/redis.conf
+    sysctls:
+      net.core.somaxconn: 1024
+  redis5-replica1:
+    image: "redis:5.0-buster"
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "INFO", "server"]
+      start_period: 5s
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      pysoa:
+        aliases:
+          - replica1.redis5.pysoa
+    volumes:
+      - type: bind
+        source: ../run/redis/redis5-replica1.conf
+        target: /usr/local/etc/redis/redis.conf
+    sysctls:
+      net.core.somaxconn: 1024
+    depends_on:
+      redis5-master:
+        condition: service_healthy
+  redis5-replica2:
+    image: "redis:5.0-buster"
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "INFO", "server"]
+      start_period: 5s
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      pysoa:
+        aliases:
+          - replica2.redis5.pysoa
+    volumes:
+      - type: bind
+        source: ../run/redis/redis5-replica2.conf
+        target: /usr/local/etc/redis/redis.conf
+    sysctls:
+      net.core.somaxconn: 1024
+    depends_on:
+      redis5-master:
+        condition: service_healthy
+  redis6-master:
+    image: "redis:6.0-rc2-buster"
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "46379", "--tls", "--cert", "/usr/local/etc/redis/tls/redis.crt",
+             "--key", "/usr/local/etc/redis/tls/redis.key", "--cacert", "/usr/local/etc/redis/tls/ca.crt",
+             "--user", "healthcheck", "--pass", "KUbMBRRnWxCxLfU4qTaBASCZs467uzxB", "--no-auth-warning",
+             "INFO", "server"]
+      start_period: 5s
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      pysoa:
+        aliases:
+          - master.redis6.pysoa
+    volumes:
+      - type: bind
+        source: ../run/redis/redis6-master.conf
+        target: /usr/local/etc/redis/redis.conf
+      - type: bind
+        source: ../docker/redis/users.acl
+        target: /usr/local/etc/redis/users.acl
+      - type: bind
+        source: ../run/tls
+        target: /usr/local/etc/redis/tls
+    sysctls:
+      net.core.somaxconn: 1024
+  redis6-replica1:
+    image: "redis:6.0-rc2-buster"
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "46379", "--tls", "--cert", "/usr/local/etc/redis/tls/redis.crt",
+             "--key", "/usr/local/etc/redis/tls/redis.key", "--cacert", "/usr/local/etc/redis/tls/ca.crt",
+             "--user", "healthcheck", "--pass", "KUbMBRRnWxCxLfU4qTaBASCZs467uzxB", "--no-auth-warning",
+             "INFO", "server"]
+      start_period: 5s
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      pysoa:
+        aliases:
+          - replica1.redis6.pysoa
+    volumes:
+      - type: bind
+        source: ../run/redis/redis6-replica1.conf
+        target: /usr/local/etc/redis/redis.conf
+      - type: bind
+        source: ../docker/redis/users.acl
+        target: /usr/local/etc/redis/users.acl
+      - type: bind
+        source: ../run/tls
+        target: /usr/local/etc/redis/tls
+    sysctls:
+      net.core.somaxconn: 1024
+    depends_on:
+      redis6-master:
+        condition: service_healthy
+  redis6-replica2:
+    image: "redis:6.0-rc2-buster"
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "46379", "--tls", "--cert", "/usr/local/etc/redis/tls/redis.crt",
+             "--key", "/usr/local/etc/redis/tls/redis.key", "--cacert", "/usr/local/etc/redis/tls/ca.crt",
+             "--user", "healthcheck", "--pass", "KUbMBRRnWxCxLfU4qTaBASCZs467uzxB", "--no-auth-warning",
+             "INFO", "server"]
+      start_period: 5s
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      pysoa:
+        aliases:
+          - replica2.redis6.pysoa
+    volumes:
+      - type: bind
+        source: ../run/redis/redis6-replica2.conf
+        target: /usr/local/etc/redis/redis.conf
+      - type: bind
+        source: ../docker/redis/users.acl
+        target: /usr/local/etc/redis/users.acl
+      - type: bind
+        source: ../run/tls
+        target: /usr/local/etc/redis/tls
+    sysctls:
+      net.core.somaxconn: 1024
+    depends_on:
+      redis6-master:
+        condition: service_healthy
+
+  # Two Sentinel clusters
+  redis5-sentinel1:
+    image: "redis:5.0-buster"
+    command: ["redis-server", "/usr/local/etc/redis/sentinel.conf", "--sentinel"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "26379", "SENTINEL", "MASTER", "functional_tests"]
+      start_period: 5s
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      pysoa:
+        aliases:
+          - sentinel1.redis5.pysoa
+    volumes:
+      - type: bind
+        source: ../run/redis/sentinel5-1.conf
+        target: /usr/local/etc/redis/sentinel.conf
+    sysctls:
+      net.core.somaxconn: 1024
+    depends_on:
+      redis5-master:
+        condition: service_healthy
+  redis5-sentinel2:
+    image: "redis:5.0-buster"
+    command: ["redis-server", "/usr/local/etc/redis/sentinel.conf", "--sentinel"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "26379", "SENTINEL", "SLAVES", "functional_tests"]
+      start_period: 5s
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      pysoa:
+        aliases:
+          - sentinel2.redis5.pysoa
+    volumes:
+      - type: bind
+        source: ../run/redis/sentinel5-2.conf
+        target: /usr/local/etc/redis/sentinel.conf
+    sysctls:
+      net.core.somaxconn: 1024
+    depends_on:
+      redis5-master:
+        condition: service_healthy
+  redis5-sentinel3:
+    image: "redis:5.0-buster"
+    command: ["redis-server", "/usr/local/etc/redis/sentinel.conf", "--sentinel"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "26379", "SENTINEL", "SENTINELS", "functional_tests"]
+      start_period: 5s
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      pysoa:
+        aliases:
+          - sentinel3.redis5.pysoa
+    volumes:
+      - type: bind
+        source: ../run/redis/sentinel5-3.conf
+        target: /usr/local/etc/redis/sentinel.conf
+    sysctls:
+      net.core.somaxconn: 1024
+    depends_on:
+      redis5-master:
+        condition: service_healthy
+  redis6-sentinel1:
+    image: "redis:6.0-rc2-buster"
+    command: ["redis-server", "/usr/local/etc/redis/sentinel.conf", "--sentinel"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "26379", "SENTINEL", "MASTER", "functional_tests"]
+      start_period: 5s
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      pysoa:
+        aliases:
+          - sentinel1.redis6.pysoa
+    volumes:
+      - type: bind
+        source: ../run/redis/sentinel6-1.conf
+        target: /usr/local/etc/redis/sentinel.conf
+      - type: bind
+        source: ../run/tls
+        target: /usr/local/etc/redis/tls
+    sysctls:
+      net.core.somaxconn: 1024
+    depends_on:
+      redis6-master:
+        condition: service_healthy
+  redis6-sentinel2:
+    image: "redis:6.0-rc2-buster"
+    command: ["redis-server", "/usr/local/etc/redis/sentinel.conf", "--sentinel"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "26379", "SENTINEL", "SLAVES", "functional_tests"]
+      start_period: 5s
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      pysoa:
+        aliases:
+          - sentinel2.redis6.pysoa
+    volumes:
+      - type: bind
+        source: ../run/redis/sentinel6-2.conf
+        target: /usr/local/etc/redis/sentinel.conf
+      - type: bind
+        source: ../run/tls
+        target: /usr/local/etc/redis/tls
+    sysctls:
+      net.core.somaxconn: 1024
+    depends_on:
+      redis6-master:
+        condition: service_healthy
+  redis6-sentinel3:
+    image: "redis:6.0-rc2-buster"
+    command: ["redis-server", "/usr/local/etc/redis/sentinel.conf", "--sentinel"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "26379", "SENTINEL", "SENTINELS", "functional_tests"]
+      start_period: 5s
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      pysoa:
+        aliases:
+          - sentinel3.redis6.pysoa
+    volumes:
+      - type: bind
+        source: ../run/redis/sentinel6-3.conf
+        target: /usr/local/etc/redis/sentinel.conf
+      - type: bind
+        source: ../run/tls
+        target: /usr/local/etc/redis/tls
+    sysctls:
+      net.core.somaxconn: 1024
+    depends_on:
+      redis6-master:
+        condition: service_healthy
+
+  # Services and test container
+  echo_service:
+    image: "pysoa-test-service-echo"
+    init: true
+    stop_grace_period: 15s
+    networks:
+      - pysoa
+    volumes:
+      - type: bind
+        source: ../run
+        target: /srv/run
+    depends_on:
+      redis5-standalone:
+        condition: service_healthy
+      redis6-standalone:
+        condition: service_healthy
+  echo_service_double_import_trap:
+    image: "pysoa-test-service-echo-double-import-trap"
+    init: true
+    stop_grace_period: 15s
+    networks:
+      - pysoa
+    volumes:
+      - type: bind
+        source: ../run
+        target: /srv/run
+    depends_on:
+      redis5-standalone:
+        condition: service_healthy
+      redis6-standalone:
+        condition: service_healthy
+  meta_service:
+    image: "pysoa-test-service-meta"
+    init: true
+    stop_grace_period: 15s
+    networks:
+      - pysoa
+    volumes:
+      - type: bind
+        source: ../run
+        target: /srv/run
+    depends_on:
+      redis5-sentinel1:
+        condition: service_healthy
+  user_service:
+    image: "pysoa-test-service-user"
+    init: true
+    stop_grace_period: 15s
+    networks:
+      - pysoa
+    volumes:
+      - type: bind
+        source: ../run
+        target: /srv/run
+    depends_on:
+      redis6-sentinel1:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      meta_service:
+        condition: service_started
+  test:
+    image: "pysoa-test-test"
+    init: true
+    networks:
+      - pysoa
+    volumes:
+      - type: bind
+        source: ../run
+        target: /srv/run
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+      - type: bind
+        source: ${DOCKER_BINARY_BIND_SOURCE}
+        target: /usr/local/bin/docker

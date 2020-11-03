@@ -1,0 +1,32 @@
+# pulled from https://gist.github.com/pfreixes/3187511
+
+_supervisor()
+{
+    local cur prev opts base
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+    #
+    #  The basic options we'll complete.
+    #
+    opts="add clear fg open quit remove restart start stop update avail exit maintail pid reload reread shutdown status tail version"
+
+
+    #
+    #  Complete the arguments to some of the basic commands.
+    #
+    case "${prev}" in
+        start|status|stop|restart)
+            local processes=$(for x in `sudo supervisorctl avail | awk '{print $1}'`; do echo ${x} ; done )
+            COMPREPLY=( $(compgen -W "${processes}" -- ${cur}) )
+            return 0
+            ;;
+        *)
+        ;;
+    esac
+
+   COMPREPLY=($(compgen -W "${opts}" -- ${cur}))
+   return 0
+}
+complete -F _supervisor supervisorctl

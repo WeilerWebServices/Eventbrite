@@ -1,0 +1,64 @@
+{
+  "name": "dorsal",
+  "version": "0.6.5",
+  "description": "HTML UI bootstrap and automation using CSS directives",
+  "homepage": "http://eventbrite.github.io/dorsal/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eventbrite/dorsal.git"
+  },
+  "main": "dist/dorsal.js",
+  "scripts": {
+    "prepublish": "grunt",
+    "test": "grunt test"
+  },
+  "keywords": [
+    "html",
+    "ui",
+    "automation",
+    "widgets",
+    "components",
+    "directives"
+  ],
+  "contributors": [
+    {
+      "name": "Alex Roberts",
+      "email": "alex@eventbrite.com",
+      "url": "http://twitter.com/mralex"
+    },
+    {
+      "name": "Parris Khachi",
+      "email": "parris@eventbrite.com",
+      "url": "http://twitter.com/parrissays"
+    },
+    {
+      "name": "Kevin Stone",
+      "email": "kevinstone@eventbrite.com"
+    },
+    {
+      "name": "German Frigerio",
+      "email": "german@eventbrite.com"
+    }
+  ],
+  "licenses": [
+    {
+      "type": "Apache 2.0",
+      "url": "LICENSE.md"
+    }
+  ],
+  "devDependencies": {
+    "grunt": "~0.4.5",
+    "grunt-banner": "^0.2.3",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-contrib-concat": "~0.4.0",
+    "grunt-contrib-jasmine": "1.0.3",
+    "grunt-contrib-jshint": "1.0.0",
+    "grunt-contrib-uglify": "~0.4.0",
+    "grunt-contrib-watch": "~0.6.1",
+    "grunt-umd": "~1.7.4",
+    "jasmine-jquery": "git://github.com/velesin/jasmine-jquery.git#584922d11787aaeeb1d2c4bd9b1b51a8fc08896d",
+    "jasmine-sinon": "^0.4.0",
+    "jquery": "^2.1.1",
+    "sinon": "~1.10.2"
+  }
+}

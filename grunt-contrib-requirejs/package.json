@@ -1,0 +1,35 @@
+{
+  "name": "grunt-contrib-requirejs",
+  "description": "Optimize RequireJS projects using r.js",
+  "version": "2.3.2",
+  "author": {
+    "name": "Grunt Team",
+    "url": "http://gruntjs.com/"
+  },
+  "repository": "gruntjs/grunt-contrib-requirejs",
+  "license": "MIT",
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "main": "tasks/requirejs.js",
+  "scripts": {
+    "test": "grunt test"
+  },
+  "dependencies": {
+    "requirejs": "2.3.2"
+  },
+  "devDependencies": {
+    "grunt": "^1.0.0",
+    "grunt-contrib-clean": "^1.0.0",
+    "grunt-contrib-internal": "^1.1.0",
+    "grunt-contrib-jshint": "^1.0.0",
+    "grunt-contrib-nodeunit": "^1.0.0"
+  },
+  "keywords": [
+    "gruntplugin"
+  ],
+  "files": [
+    "tasks"
+  ],
+  "appveyor_id": "ithfwohrb4u06rx3"
+}

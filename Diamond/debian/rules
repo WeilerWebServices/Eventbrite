@@ -1,0 +1,12 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+clean::
+	rm -rf build build-stamp configure-stamp build/ MANIFEST
+	dh_clean
+
+export PYBUILD_NAME=diamond
+
+%:
+	dh $@ --with python2 --buildsystem=pybuild
+

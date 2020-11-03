@@ -1,0 +1,22 @@
+{
+    "pagination": {
+        "object_count": 1,
+        "page_count": 1,
+        "page_number": 1,
+        "page_size": 50
+    },
+    "webhooks": [
+        {
+            "actions": [
+                "order.placed",
+                "order.refunded"
+            ],
+            "created": "2017-10-12T12:01:38Z",
+            "endpoint_url": "https://some.url/that/receives/the/webhook",
+            "event_id": null,
+            "id": "12345",
+            "resource_uri": "https://www.eventbriteapi.com/v3/webhooks/12345/",
+            "user_id": "00001111"
+        }
+    ]
+}

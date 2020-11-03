@@ -1,0 +1,7 @@
+{
+  "extends": "./index.js",
+  "rules": {
+    "import/unambiguous": "off",
+    "import/no-commonjs": "off"
+  }
+}

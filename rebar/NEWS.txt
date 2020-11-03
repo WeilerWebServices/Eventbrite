@@ -1,0 +1,25 @@
+News
+====
+
+0.3
+---
+
+*Release date: UNRELEASED*
+
+* No longer pass "commit=True" when saving model instances
+
+0.2
+---
+
+*Release date: UNRELEASED*
+
+* Rewrite of Form Groups with tests
+* Additional documentation
+* Python 3.3 compatibility.
+
+0.1
+---
+
+*Release date: 2012-03-11*
+
+* Initial export of rebar

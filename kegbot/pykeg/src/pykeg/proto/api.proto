@@ -1,0 +1,219 @@
+option java_package = "org.kegbot.proto";
+import "models.proto";
+
+// Common
+
+message Paging {
+
+  // The total number of records available for this request.
+  optional uint32 total = 1;
+
+  // The maximum number of records returned in this request.
+  optional uint32 limit = 2;
+
+  // The position of the first record returned, among "total".
+  optional uint32 pos = 3;
+}
+
+// Requests
+
+message UserRegistrationRequest {
+
+  // Desired username.
+  required string username = 1;
+
+  // User's e-mail address.
+  required string email = 2;
+
+  // Initial password for logging in.  If unspecified, the account will be
+  // registered with a random password, which can be e-mailed to the user.
+  optional string password = 3;
+
+  // One of "male", "female".
+  optional string gender = 4;
+
+  // Twitter username.
+  optional string twitter_name = 5;
+}
+
+// Message used for recording a new drink on the backend.
+message RecordDrinkRequest {
+
+  // Name of the tap on which this drink was poured.  This information is
+  // required, but this field may be omitted when the tap name is given
+  // elsewhere.  (In the Kegweb API, the tap_name is part of the URL receiving
+  // the POST.)
+  optional string tap_name = 1;
+
+  // The number of ticks, as reported by the flowmeter.  Required.
+  required uint32 ticks = 2;
+
+  // The volume of the pour.  If unspecified, the backend will use the current
+  // tap configuration to compute the pour's volume based on the value of
+  // "ticks".
+  optional float volume_ml = 3;
+
+  // The username responsible for the pour.  If unspecified, this pour is
+  // treated as an anonymous pour.
+  optional string username = 4;
+
+  // The date and time of the pour, in seconds before "now", where "now" is the
+  // current time on the backend at the time the request is processed.  If this
+  // field is unspecified, a default value of "0" (meaning "now") is assumed.
+  // This value is ignored if "record_date" is specified.
+  optional uint32 seconds_ago = 5 [default = 0];
+
+  // The absolute date and time of the pour, as an ISO8061 UTC timestamp.  If
+  // specified and valid, this value supercedes any value given for
+  // "seconds_ago", which will be ignored.
+  optional string record_date = 6;
+
+  // The time taken, in seconds, to complete the pour.
+  optional uint32 duration_seconds = 7;
+
+  // The authentication token used to pour the drink.
+  optional string auth_token = 8;
+
+  // If true, the pour is recorded as "spilled": no drink record will be
+  // generated, and all fields other than "tap_name" and the volume ("ticks", or
+  // "volume_ml" if given) are ignored.  The volume will be added to the
+  // spilled total for the tap’s current keg.
+  optional bool spilled = 9;
+}
+
+// Message used for recording a temperature sensor reading on the backend.
+message RecordTemperatureRequest {
+
+  // The name of the sensor, as stored in the backend.
+  required string sensor_name = 1;
+
+  // The observed temperature, in degress centigrade.
+  required float temp_c = 2;
+
+  // The date of the reading, as an ISO8601 UTC timestamp.  If this field is
+  // unspecified, the record_date will be the current time on the backend at the
+  // time the request is processed.
+  optional string record_date = 3;
+}
+
+// Responses
+
+message DrinkSet {
+  repeated Drink drinks = 1;
+  optional Paging paging = 2;
+}
+
+message KegDetailSet {
+  repeated KegDetail kegs = 1;
+  optional Paging paging = 2;
+}
+
+message SessionSet {
+  repeated Session sessions = 1;
+  optional Paging paging = 2;
+}
+
+message SystemEventSet {
+  repeated SystemEvent events = 1;
+  optional Paging paging = 2;
+}
+
+message SystemEventDetailSet {
+  repeated SystemEventDetail events = 1;
+  optional Paging paging = 2;
+}
+
+message SystemEventHtmlSet {
+  repeated SystemEventHtml events = 1;
+  optional Paging paging = 2;
+}
+
+message SoundEventSet {
+  repeated SoundEvent events = 1;
+  optional Paging paging = 2;
+}
+
+message TapDetailSet {
+  repeated TapDetail taps = 1;
+  optional Paging paging = 2;
+}
+
+message DrinkDetailHtmlSet {
+  repeated DrinkDetailHtml drinks = 1;
+  optional Paging paging = 2;
+}
+
+message ThermoSensorSet {
+  repeated ThermoSensor sensors = 1;
+  optional Paging paging = 2;
+}
+
+message ThermoLogSet {
+  repeated ThermoLog logs = 1;
+  optional Paging paging = 2;
+}
+
+message TapDetail {
+  required KegTap tap = 1;
+  optional Keg keg = 2;
+  optional BeerType beer_type = 3;
+  optional Brewer brewer = 4;
+}
+
+message DrinkDetail {
+  required Drink drink = 1;
+  optional User user = 2;
+  optional Keg keg = 3;
+  optional Session session = 4;
+}
+
+message SessionDetail {
+  required Session session = 1;
+  optional Stats stats = 2;
+  repeated Keg kegs = 3;
+  repeated Drink drinks = 4;
+}
+
+message KegDetail {
+  required Keg keg = 1;
+  optional BeerType type = 2;
+  optional KegSize size = 3;
+  repeated Drink drinks = 4;
+  repeated Session sessions = 5;
+}
+
+message UserDetail {
+  required User user = 1;
+}
+
+message UserDetailSet {
+  repeated UserDetail users = 1;
+  optional Paging paging = 2;
+}
+
+message SystemEventDetail {
+  required SystemEvent event = 1;
+  optional Image image = 2;
+  optional DrinkDetail drink_detail = 3;
+  optional KegDetail keg_detail = 4;
+}
+
+message SystemEventHtml {
+  required string id = 1;
+  optional string html = 2;
+}
+
+message ThermoSensorDetail {
+  required ThermoSensor sensor = 1;
+  optional float last_temp = 2;
+  optional string last_time = 3;
+}
+
+message DrinkDetailHtml {
+  required string id = 1;
+  required string box_html = 2;
+}
+
+service KegwebApi {
+  //rpc getLastDrinks (NullRequest) returns LastDrinkResponse;
+}
